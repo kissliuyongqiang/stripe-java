@@ -2,25 +2,28 @@ package com.stripe.net;
 
 import java.util.List;
 import java.util.Map;
+import java.util.TreeMap;
 
 public class StripeResponse {
 
   int code;
   String body;
-  StripeHeaders headers;
+  Map<String, List<String>> headers;
 
   /** Constructs a Stripe response with the specified status code and body. */
   public StripeResponse(int code, String body) {
-    this.code = code;
-    this.body = body;
-    this.headers = null;
+    this(code, body, null);
   }
 
   /** Constructs a Stripe response with the specified status code, body and headers. */
   public StripeResponse(int code, String body, Map<String, List<String>> headers) {
     this.code = code;
     this.body = body;
-    this.headers = new StripeHeaders(headers);
+
+    if (headers != null) {
+      this.headers = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
+      this.headers.putAll(headers);
+    }
   }
 
   public int code() {
@@ -31,15 +34,19 @@ public class StripeResponse {
     return this.body;
   }
 
-  public StripeHeaders headers() {
+  public Map<String, List<String>> headers() {
     return headers;
   }
 
   public String idempotencyKey() {
-    return (headers != null) ? headers.get("Idempotency-Key") : null;
+    return ((headers != null) && headers.containsKey("Idempotency-Key"))
+        ? headers.get("Idempotency-Key").get(0)
+        : null;
   }
 
   public String requestId() {
-    return (headers != null) ? headers.get("Request-Id") : null;
+    return ((headers != null) && headers.containsKey("Request-Id"))
+        ? headers.get("Request-Id").get(0)
+        : null;
   }
 }

@@ -22,7 +22,7 @@ import com.stripe.model.oauth.OAuthError;
 import java.util.Map;
 
 public class LiveStripeResponseGetter implements StripeResponseGetter {
-  private final HttpClient httpClient = new HttpClient();
+  private final HttpClient httpClient = new HttpURLConnectionClient();
 
   @Override
   public <T> T request(
@@ -33,7 +33,9 @@ public class LiveStripeResponseGetter implements StripeResponseGetter {
       ApiResource.RequestType type,
       RequestOptions options)
       throws StripeException {
-    StripeResponse response = httpClient.request(method, url, params, type, options);
+    StripeRequest request = new StripeRequest(type, method, url, params, options);
+
+    StripeResponse response = this.httpClient.request(request);
 
     int responseCode = response.code();
     String responseBody = response.body();
@@ -67,7 +69,9 @@ public class LiveStripeResponseGetter implements StripeResponseGetter {
       ApiResource.RequestType type,
       RequestOptions options)
       throws StripeException {
-    StripeResponse response = this.httpClient.request(method, url, params, type, options);
+    StripeRequest request = new StripeRequest(type, method, url, params, options);
+
+    StripeResponse response = this.httpClient.request(request);
 
     int responseCode = response.code();
     String responseBody = response.body();
